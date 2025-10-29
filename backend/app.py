@@ -2703,12 +2703,13 @@ def telegram_webhook():
                 add_log("ERROR", f"解析callback_data时发生未知错误: {str(e)}, data={callback_data[:100]}", "telegram")
                 return jsonify({"ok": False, "error": "Invalid callback data"}), 400
             
-            action = callback_data_obj.get("action")
+            # 支持短字段名（a, p, d, o）和长字段名（action, planCode, datacenter, options）
+            action = callback_data_obj.get("a") or callback_data_obj.get("action")
             
             if action == "add_to_queue":
-                plan_code = callback_data_obj.get("planCode")
-                datacenter = callback_data_obj.get("datacenter")
-                options = callback_data_obj.get("options", [])
+                plan_code = callback_data_obj.get("p") or callback_data_obj.get("planCode")
+                datacenter = callback_data_obj.get("d") or callback_data_obj.get("datacenter")
+                options = callback_data_obj.get("o") if "o" in callback_data_obj else (callback_data_obj.get("options", []))
                 
                 if not plan_code or not datacenter:
                     return jsonify({"ok": False, "error": "Missing planCode or datacenter"}), 400

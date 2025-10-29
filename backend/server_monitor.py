@@ -506,11 +506,12 @@ class ServerMonitor:
                 
                 # 构建回调数据：planCode|datacenter|options(JSON编码)
                 options = config_info.get("options", []) if config_info else []
+                # 使用短字段名以节省空间：a=action, p=planCode, d=datacenter, o=options
                 callback_data = {
-                    "action": "add_to_queue",
-                    "planCode": plan_code,
-                    "datacenter": dc,
-                    "options": options
+                    "a": "add_to_queue",
+                    "p": plan_code,
+                    "d": dc,
+                    "o": options
                 }
                 # Telegram callback_data 最大64字节
                 callback_data_str = json.dumps(callback_data, ensure_ascii=False, separators=(',', ':'))
@@ -527,10 +528,10 @@ class ServerMonitor:
                         # 优先截断options列表
                         if len(options) > 0:
                             callback_data_truncated = {
-                                "action": "add_to_queue",
-                                "planCode": plan_code,
-                                "datacenter": dc,
-                                "options": []  # 清空options，减少数据大小
+                                "a": "add_to_queue",
+                                "p": plan_code,
+                                "d": dc
+                                # 清空options，减少数据大小
                             }
                             callback_data_str = json.dumps(callback_data_truncated, ensure_ascii=False, separators=(',', ':'))
                             callback_data_bytes = callback_data_str.encode('utf-8')
