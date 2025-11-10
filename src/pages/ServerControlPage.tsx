@@ -2092,7 +2092,7 @@ const ServerControlPage: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="cyber-card">
+            <div className="cyber-card mb-6 sm:mb-8">
               <label className="block text-cyber-text font-medium mb-2">选择服务器</label>
               <select
                 value={selectedServer?.serviceName || ''}
@@ -2123,34 +2123,34 @@ const ServerControlPage: React.FC = () => {
             {/* 选中服务器的详细信息 */}
             {selectedServer && (
               <div className="space-y-8">
-              <div className="cyber-card">
-                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-cyber-text mb-3 sm:mb-4`}>服务器信息</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm mb-4 sm:mb-6">
-                  <div>
+              <div className="cyber-card p-5 sm:p-6">
+                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-cyber-text mb-5 sm:mb-6`}>服务器信息</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-5 gap-x-6 sm:gap-x-8 text-xs sm:text-sm mb-4 sm:mb-6">
+                  <div className="py-2">
                     <span className="text-cyber-muted">服务名称:</span>
                     <span className="text-cyber-text ml-2">{selectedServer.serviceName}</span>
                   </div>
-                  <div>
+                  <div className="py-2">
                     <span className="text-cyber-muted">显示名称:</span>
                     <span className="text-cyber-text ml-2">{selectedServer.name}</span>
                   </div>
-                  <div>
+                  <div className="py-2">
                     <span className="text-cyber-muted">型号:</span>
                     <span className="text-cyber-text ml-2 font-mono">{selectedServer.commercialRange}</span>
                   </div>
-                  <div>
+                  <div className="py-2">
                     <span className="text-cyber-muted">数据中心:</span>
                     <span className="text-cyber-text ml-2">{selectedServer.datacenter}</span>
                   </div>
-                  <div>
+                  <div className="py-2">
                     <span className="text-cyber-muted">IP地址:</span>
                     <span className="text-cyber-text ml-2 font-mono">{selectedServer.ip}</span>
                   </div>
-                  <div>
+                  <div className="py-2">
                     <span className="text-cyber-muted">操作系统:</span>
                     <span className="text-cyber-text ml-2">{selectedServer.os}</span>
                   </div>
-                  <div>
+                  <div className="py-2">
                     <span className="text-cyber-muted">状态:</span>
                     <span className="text-green-400 ml-2 capitalize">{selectedServer.state}</span>
                   </div>
@@ -5231,104 +5231,122 @@ const ServerControlPage: React.FC = () => {
                 </div>
 
                 {/* 标签页导航 */}
-                <div className="flex items-center gap-2 mb-4 border-b border-cyber-accent/20 pb-2 overflow-x-auto flex-shrink-0">
-                  <button
-                    onClick={() => { setAdvancedTab('burst'); selectedServer && fetchBurst(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'burst'
-                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 shadow-sm shadow-yellow-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Zap className="w-3 h-3 flex-shrink-0" />
-                    <span className="hidden sm:inline">突发带宽</span>
-                    <span className="sm:hidden">突发</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('firewall'); selectedServer && fetchFirewall(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'firewall'
-                        ? 'bg-red-500/20 text-red-400 border border-red-500/40 shadow-sm shadow-red-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Shield className="w-3 h-3 flex-shrink-0" />
-                    <span className="hidden sm:inline">防火墙</span>
-                    <span className="sm:hidden">防火墙</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('backup'); selectedServer && fetchBackupFtp(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'backup'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 shadow-sm shadow-blue-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Database className="w-3 h-3 flex-shrink-0" />
-                    <span className="hidden sm:inline">备份FTP</span>
-                    <span className="sm:hidden">备份</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('dns'); selectedServer && fetchSecondaryDns(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'dns'
-                        ? 'bg-green-500/20 text-green-400 border border-green-500/40 shadow-sm shadow-green-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Globe className="w-3 h-3 flex-shrink-0" />
-                    <span className="hidden sm:inline">从DNS</span>
-                    <span className="sm:hidden">DNS</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('vmac'); selectedServer && fetchVirtualMacs(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'vmac'
-                        ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40 shadow-sm shadow-purple-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Network className="w-3 h-3 flex-shrink-0" />
-                    <span className="hidden sm:inline">虚拟MAC</span>
-                    <span className="sm:hidden">MAC</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('vrack'); selectedServer && fetchVracks(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'vrack'
-                        ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 shadow-sm shadow-indigo-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Server className="w-3 h-3 flex-shrink-0" />
-                    <span>vRack</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('orderable'); selectedServer && fetchOrderable(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'orderable'
-                        ? 'bg-pink-500/20 text-pink-400 border border-pink-500/40 shadow-sm shadow-pink-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <BarChart3 className="w-3 h-3 flex-shrink-0" />
-                    <span className="hidden sm:inline">可订购</span>
-                    <span className="sm:hidden">订购</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('options'); selectedServer && fetchServerOptions(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'options'
-                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Cog className="w-3 h-3 flex-shrink-0" />
-                    <span>选项</span>
-                  </button>
-                  <button
-                    onClick={() => { setAdvancedTab('ip'); selectedServer && fetchIpSpecs(selectedServer.serviceName); }}
-                    className={`px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1 active:scale-95 ${
-                      advancedTab === 'ip'
-                        ? 'bg-teal-500/20 text-teal-400 border border-teal-500/40 shadow-sm shadow-teal-500/20'
-                        : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
-                    }`}>
-                    <Wifi className="w-3 h-3 flex-shrink-0" />
-                    <span className="hidden sm:inline">IP规格</span>
-                    <span className="sm:hidden">IP</span>
-                  </button>
+                <div className="mb-4 border-b border-cyber-accent/20 pb-2 flex-shrink-0 -mx-2 sm:mx-0 px-2 sm:px-0">
+                  <div 
+                    className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide" 
+                    style={{ 
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                      WebkitOverflowScrolling: 'touch'
+                    }}
+                  >
+                    <button
+                      onClick={() => { setAdvancedTab('burst'); selectedServer && fetchBurst(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'burst'
+                          ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 shadow-sm shadow-yellow-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="突发带宽">
+                      <Zap className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden md:inline">突发带宽</span>
+                      <span className="hidden sm:inline md:hidden">突发</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('firewall'); selectedServer && fetchFirewall(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'firewall'
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/40 shadow-sm shadow-red-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="防火墙">
+                      <Shield className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden md:inline">防火墙</span>
+                      <span className="hidden sm:inline md:hidden">防火墙</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('backup'); selectedServer && fetchBackupFtp(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'backup'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40 shadow-sm shadow-blue-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="备份FTP">
+                      <Database className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden md:inline">备份FTP</span>
+                      <span className="hidden sm:inline md:hidden">备份</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('dns'); selectedServer && fetchSecondaryDns(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'dns'
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/40 shadow-sm shadow-green-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="从DNS">
+                      <Globe className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden md:inline">从DNS</span>
+                      <span className="hidden sm:inline md:hidden">DNS</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('vmac'); selectedServer && fetchVirtualMacs(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'vmac'
+                          ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40 shadow-sm shadow-purple-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="虚拟MAC">
+                      <Network className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden md:inline">虚拟MAC</span>
+                      <span className="hidden sm:inline md:hidden">MAC</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('vrack'); selectedServer && fetchVracks(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'vrack'
+                          ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 shadow-sm shadow-indigo-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="vRack">
+                      <Server className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden sm:inline">vRack</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('orderable'); selectedServer && fetchOrderable(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'orderable'
+                          ? 'bg-pink-500/20 text-pink-400 border border-pink-500/40 shadow-sm shadow-pink-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="可订购">
+                      <BarChart3 className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden md:inline">可订购</span>
+                      <span className="hidden sm:inline md:hidden">订购</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('options'); selectedServer && fetchServerOptions(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'options'
+                          ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="选项">
+                      <Cog className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden sm:inline">选项</span>
+                    </button>
+                    <button
+                      onClick={() => { setAdvancedTab('ip'); selectedServer && fetchIpSpecs(selectedServer.serviceName); }}
+                      className={`min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-medium transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1.5 sm:gap-1 active:scale-95 flex-shrink-0 ${
+                        advancedTab === 'ip'
+                          ? 'bg-teal-500/20 text-teal-400 border border-teal-500/40 shadow-sm shadow-teal-500/20'
+                          : 'text-cyber-muted hover:text-cyber-text hover:bg-cyber-accent/10 border border-transparent'
+                      }`}
+                      title="IP规格">
+                      <Wifi className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="hidden md:inline">IP规格</span>
+                      <span className="hidden sm:inline md:hidden">IP</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* 内容区域 */}

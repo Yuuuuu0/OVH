@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAPI } from "@/context/APIContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +8,7 @@ import { CacheManager } from "@/components/CacheManager";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getApiSecretKey, setApiSecretKey } from "@/utils/apiClient";
 import { api } from "@/utils/apiClient";
+import { X, AlertCircle, FileText, CheckCircle, AlertTriangle } from "lucide-react";
 
 const SettingsPage = () => {
   const isMobile = useIsMobile();
@@ -51,6 +53,7 @@ const SettingsPage = () => {
   const [webhookInfo, setWebhookInfo] = useState<any>(null);
   const [isSettingWebhook, setIsSettingWebhook] = useState(false);
   const [isLoadingWebhookInfo, setIsLoadingWebhookInfo] = useState(false);
+  const [showErrorHistoryDialog, setShowErrorHistoryDialog] = useState(false);
 
   // Load current values when component mounts
   useEffect(() => {
@@ -153,6 +156,39 @@ const SettingsPage = () => {
       autoDetectWebhookUrl();
     }
   }, [tgToken]);
+
+  // 计算错误信息辅助函数
+  const getErrorInfo = () => {
+    if (!webhookInfo?.last_error_date) return null;
+    
+    const errorDate = new Date(webhookInfo.last_error_date * 1000);
+    const now = new Date();
+    const msSinceError = now.getTime() - errorDate.getTime();
+    const hoursSinceError = msSinceError / (1000 * 60 * 60);
+    const daysSinceError = msSinceError / (1000 * 60 * 60 * 24);
+    const isRecentError = hoursSinceError < 24;
+    
+    const formatRelativeTime = () => {
+      if (hoursSinceError < 1) {
+        const minutes = Math.floor(msSinceError / (1000 * 60));
+        return `${minutes}分钟前`;
+      } else if (hoursSinceError < 24) {
+        return `${Math.floor(hoursSinceError)}小时前`;
+      } else if (daysSinceError < 7) {
+        return `${Math.floor(daysSinceError)}天前`;
+      } else {
+        return errorDate.toLocaleDateString('zh-CN');
+      }
+    };
+    
+    return {
+      errorDate,
+      isRecentError,
+      formatRelativeTime,
+      hoursSinceError,
+      daysSinceError
+    };
+  };
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -593,15 +629,24 @@ const SettingsPage = () => {
                       {/* 显示 Webhook 状态 */}
                       {webhookInfo && (
                         <div className="bg-gradient-to-br from-cyber-dark/50 to-cyber-dark/30 border border-cyber-accent/20 rounded-lg p-3 sm:p-4 space-y-3">
-                          <div className="flex items-center justify-between pb-2 border-b border-cyber-accent/10">
+                          <div className="flex items-center justify-between pb-3 border-b border-cyber-accent/10">
                             <span className="text-xs sm:text-sm text-cyber-muted font-medium">当前状态</span>
-                            <span className={`text-xs sm:text-sm font-semibold px-2 py-1 rounded ${
+                            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${
                               webhookInfo.url 
-                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                                : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                ? 'bg-green-500/20 border border-green-500/40' 
+                                : 'bg-yellow-500/20 border border-yellow-500/40'
                             }`}>
-                              {webhookInfo.url ? '✅ 已设置' : '⚠️ 未设置'}
-                            </span>
+                              {webhookInfo.url ? (
+                                <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+                              ) : (
+                                <AlertTriangle className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
+                              )}
+                              <span className={`text-xs sm:text-sm font-medium ${
+                                webhookInfo.url ? 'text-green-400' : 'text-yellow-400'
+                              }`}>
+                                {webhookInfo.url ? '已设置' : '未设置'}
+                              </span>
+                            </div>
                           </div>
                           
                           {webhookInfo.url && (
@@ -627,87 +672,42 @@ const SettingsPage = () => {
                               )}
                               
                               {webhookInfo.last_error_date && (() => {
-                                const errorDate = new Date(webhookInfo.last_error_date * 1000);
-                                const now = new Date();
-                                const msSinceError = now.getTime() - errorDate.getTime();
-                                const hoursSinceError = msSinceError / (1000 * 60 * 60);
-                                const daysSinceError = msSinceError / (1000 * 60 * 60 * 24);
-                                const isRecentError = hoursSinceError < 24;
-                                const hasNoPendingUpdates = webhookInfo.pending_update_count === 0;
-                                
-                                // 格式化相对时间
-                                const formatRelativeTime = () => {
-                                  if (hoursSinceError < 1) {
-                                    const minutes = Math.floor(msSinceError / (1000 * 60));
-                                    return `${minutes}分钟前`;
-                                  } else if (hoursSinceError < 24) {
-                                    return `${Math.floor(hoursSinceError)}小时前`;
-                                  } else if (daysSinceError < 7) {
-                                    return `${Math.floor(daysSinceError)}天前`;
-                                  } else {
-                                    return errorDate.toLocaleDateString('zh-CN');
-                                  }
-                                };
+                                const errorInfo = getErrorInfo();
+                                if (!errorInfo) return null;
                                 
                                 return (
-                                  <div className={`border rounded-lg p-3 mt-2 transition-all ${
-                                    isRecentError 
-                                      ? 'bg-red-500/10 border-red-500/30' 
-                                      : 'bg-yellow-500/10 border-yellow-500/30'
-                                  }`}>
-                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowErrorHistoryDialog(true)}
+                                    className={`w-full mt-2 border rounded-lg p-3 transition-all text-left hover:opacity-80 ${
+                                      errorInfo.isRecentError
+                                        ? 'bg-red-500/10 border-red-500/30 hover:bg-red-500/15'
+                                        : 'bg-yellow-500/10 border-yellow-500/30 hover:bg-yellow-500/15'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between gap-2 mb-1">
                                       <div className="flex items-center gap-1.5">
+                                        <FileText className={`w-3.5 h-3.5 ${
+                                          errorInfo.isRecentError ? 'text-red-400' : 'text-yellow-400'
+                                        }`} />
                                         <span className={`text-xs font-semibold ${
-                                          isRecentError ? 'text-red-400' : 'text-yellow-400'
+                                          errorInfo.isRecentError ? 'text-red-400' : 'text-yellow-400'
                                         }`}>
-                                          {isRecentError ? '⚠️' : '📋'} {isRecentError ? '最后错误' : '历史错误'}
+                                          {errorInfo.isRecentError ? '⚠️ 最后错误' : '📋 历史错误'}
                                         </span>
                                       </div>
                                       <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                        isRecentError 
-                                          ? 'bg-red-500/20 text-red-300' 
+                                        errorInfo.isRecentError
+                                          ? 'bg-red-500/20 text-red-300'
                                           : 'bg-yellow-500/20 text-yellow-300'
                                       }`}>
-                                        {formatRelativeTime()}
+                                        {errorInfo.formatRelativeTime()}
                                       </span>
                                     </div>
-                                    
-                                    <div className={`text-xs font-mono mb-1.5 ${
-                                      isRecentError ? 'text-red-300/80' : 'text-yellow-300/80'
-                                    }`}>
-                                      {errorDate.toLocaleString('zh-CN', {
-                                        year: 'numeric',
-                                        month: '2-digit',
-                                        day: '2-digit',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        second: '2-digit',
-                                        hour12: false
-                                      })}
+                                    <div className="text-xs text-cyber-muted mt-1">
+                                      点击查看详细信息
                                     </div>
-                                    
-                                    {webhookInfo.last_error_message && (
-                                      <div className={`text-xs leading-relaxed break-words p-2 rounded bg-black/20 ${
-                                        isRecentError ? 'text-red-200' : 'text-yellow-200'
-                                      }`}>
-                                        {webhookInfo.last_error_message}
-                                      </div>
-                                    )}
-                                    
-                                    {!isRecentError && hasNoPendingUpdates && (
-                                      <div className="text-xs text-green-300/90 mt-3 pt-2 border-t border-yellow-500/20 flex items-start gap-1.5">
-                                        <span>💡</span>
-                                        <span>待处理更新为 0，Webhook 可能已恢复正常。如需清除此错误记录，请重新设置 Webhook。</span>
-                                      </div>
-                                    )}
-                                    
-                                    {isRecentError && (
-                                      <div className="text-xs text-red-300/80 mt-2 pt-2 border-t border-red-500/20 flex items-start gap-1.5">
-                                        <span>🔍</span>
-                                        <span>这是最近的错误，请检查 Webhook 配置和服务器状态。</span>
-                                      </div>
-                                    )}
-                                  </div>
+                                  </button>
                                 );
                               })()}
                             </>
@@ -861,6 +861,119 @@ const SettingsPage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 错误历史模态框 */}
+      {createPortal(
+        <AnimatePresence>
+          {showErrorHistoryDialog && webhookInfo?.last_error_date && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowErrorHistoryDialog(false)}
+                className="absolute inset-0 bg-black/70 backdrop-blur-md pointer-events-auto"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                onClick={(e) => e.stopPropagation()}
+                className="cyber-card max-w-2xl w-full max-h-[90vh] overflow-y-auto pointer-events-auto relative"
+              >
+                <div className="flex items-center justify-between mb-4 pb-4 border-b border-cyber-accent/20">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-xl font-semibold text-cyber-text">
+                      {(() => {
+                        const errorInfo = getErrorInfo();
+                        return errorInfo?.isRecentError ? '最后错误' : '历史错误';
+                      })()}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setShowErrorHistoryDialog(false)}
+                    className="p-2 hover:bg-cyber-grid/50 rounded-lg transition-colors text-cyber-muted hover:text-cyber-text"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {(() => {
+                    const errorInfo = getErrorInfo();
+                    if (!errorInfo) return null;
+                    
+                    const hasNoPendingUpdates = webhookInfo.pending_update_count === 0;
+                    
+                    return (
+                      <div className={`border rounded-lg p-4 transition-all ${
+                        errorInfo.isRecentError 
+                          ? 'bg-red-500/10 border-red-500/30' 
+                          : 'bg-yellow-500/10 border-yellow-500/30'
+                      }`}>
+                        <div className="flex items-start justify-between gap-2 mb-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`text-sm font-semibold ${
+                              errorInfo.isRecentError ? 'text-red-400' : 'text-yellow-400'
+                            }`}>
+                              {errorInfo.isRecentError ? '⚠️' : '📋'} {errorInfo.isRecentError ? '最后错误' : '历史错误'}
+                            </span>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            errorInfo.isRecentError 
+                              ? 'bg-red-500/20 text-red-300' 
+                              : 'bg-yellow-500/20 text-yellow-300'
+                          }`}>
+                            {errorInfo.formatRelativeTime()}
+                          </span>
+                        </div>
+                        
+                        <div className={`text-sm font-mono mb-3 ${
+                          errorInfo.isRecentError ? 'text-red-300/80' : 'text-yellow-300/80'
+                        }`}>
+                          {errorInfo.errorDate.toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                          })}
+                        </div>
+                        
+                        {webhookInfo.last_error_message && (
+                          <div className={`text-sm leading-relaxed break-words p-3 rounded bg-black/20 mb-3 ${
+                            errorInfo.isRecentError ? 'text-red-200' : 'text-yellow-200'
+                          }`}>
+                            {webhookInfo.last_error_message}
+                          </div>
+                        )}
+                        
+                        {!errorInfo.isRecentError && hasNoPendingUpdates && (
+                          <div className="text-sm text-green-300/90 pt-3 border-t border-yellow-500/20 flex items-start gap-2">
+                            <span className="text-base">💡</span>
+                            <span>待处理更新为 0，Webhook 可能已恢复正常。如需清除此错误记录，请重新设置 Webhook。</span>
+                          </div>
+                        )}
+                        
+                        {errorInfo.isRecentError && (
+                          <div className="text-sm text-red-300/80 pt-3 border-t border-red-500/20 flex items-start gap-2">
+                            <span className="text-base">🔍</span>
+                            <span>这是最近的错误，请检查 Webhook 配置和服务器状态。</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
     </div>
   );
