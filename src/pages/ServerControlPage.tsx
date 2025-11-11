@@ -258,6 +258,9 @@ const ServerControlPage: React.FC = () => {
   // 安装进度监控
   const [showInstallProgress, setShowInstallProgress] = useState(false);
   const [installProgress, setInstallProgress] = useState<InstallProgress | null>(null);
+  
+  // Proxmox 9 + ZFS
+  const [useProxmox9Zfs, setUseProxmox9Zfs] = useState(false);
   const [installCompleted, setInstallCompleted] = useState(false); // 标记安装是否已完成
   const [autoCloseCountdown, setAutoCloseCountdown] = useState(8); // 自动关闭倒计时
   const [installPollingInterval, setInstallPollingInterval] = useState<NodeJS.Timeout | null>(null);
@@ -775,7 +778,8 @@ const ServerControlPage: React.FC = () => {
     try {
       const installData: any = {
         templateName: selectedTemplate,
-        customHostname: customHostname || undefined
+        customHostname: customHostname || undefined,
+        useProxmox9Zfs: useProxmox9Zfs  // 添加 Proxmox 9 ZFS 标志
       };
       
       // 如果用户启用了自定义存储配置或软RAID
@@ -2926,6 +2930,47 @@ const ServerControlPage: React.FC = () => {
               <p className="text-cyber-muted text-sm mb-4">
                 选择要安装的操作系统模板。此操作将清空服务器所有数据。
               </p>
+
+              {/* Proxmox 9 + ZFS 选项 */}
+              {selectedTemplate === 'proxmox9_64' && (
+                <div className="mb-4 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Database className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="text-green-400 font-medium text-sm mb-2">
+                        Proxmox VE 9 + ZFS 根文件系统
+                      </h4>
+                      <p className="text-cyber-muted text-xs mb-3">
+                        使用 ZFS 作为根文件系统，提供快照、压缩、数据完整性检查等高级功能
+                      </p>
+                      
+                      <label className="flex items-center gap-2 cursor-pointer mb-2">
+                        <input
+                          type="checkbox"
+                          checked={useProxmox9Zfs}
+                          onChange={(e) => setUseProxmox9Zfs(e.target.checked)}
+                          className="w-4 h-4 rounded border-green-500/30 bg-cyber-dark text-green-500 focus:ring-green-500"
+                        />
+                        <span className="text-sm text-cyber-text">
+                          启用 ZFS 根文件系统（推荐）
+                        </span>
+                      </label>
+                      
+                      {useProxmox9Zfs && (
+                        <div className="mt-2 p-3 bg-green-500/20 rounded-lg text-xs space-y-1">
+                          <div className="text-green-300 font-medium mb-2">✅ ZFS 分区配置：</div>
+                          <div className="text-green-200">• /boot: ext4, 1GB, RAID1</div>
+                          <div className="text-green-200">• swap: 8GB, RAID1</div>
+                          <div className="text-green-200">• /: ZFS rpool, 剩余空间, RAID1</div>
+                          <div className="text-green-300 mt-2 text-xs">
+                            💡 所有磁盘将使用 RAID1 镜像保护数据
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Windows 安装提示 */}
               <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
