@@ -2961,9 +2961,10 @@ const ServerControlPage: React.FC = () => {
                           <div className="text-green-300 font-medium mb-2">✅ ZFS 分区配置：</div>
                           <div className="text-green-200">• /boot: ext4, 1GB, RAID1</div>
                           <div className="text-green-200">• swap: 8GB, RAID1</div>
-                          <div className="text-green-200">• /: ZFS rpool, 剩余空间, RAID1</div>
+                          <div className="text-green-200">• /: ZFS rpool, 100GB, RAID1 (系统+应用)</div>
+                          <div className="text-green-200">• /var/lib/vz: ZFS rpool, ~350GB, RAID1 (VM/容器)</div>
                           <div className="text-green-300 mt-2 text-xs">
-                            💡 所有磁盘将使用 RAID1 镜像保护数据
+                            💡 所有分区使用 RAID1 镜像保护数据
                           </div>
                         </div>
                       )}
