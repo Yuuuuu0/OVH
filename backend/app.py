@@ -217,10 +217,9 @@ def load_data():
                     # 恢复已知服务器列表
                     if 'known_servers' in subscriptions_data:
                         monitor.known_servers = set(subscriptions_data['known_servers'])
-                    # 恢复检查间隔
-                    if 'check_interval' in subscriptions_data:
-                        monitor.check_interval = subscriptions_data['check_interval']
-                        print(f"已加载检查间隔: {monitor.check_interval}秒")
+                    # 检查间隔全局强制为5秒（忽略配置文件中的值）
+                    monitor.check_interval = 5
+                    print(f"检查间隔已强制设置为: 5秒（全局固定值）")
                     print(f"已加载 {len(monitor.subscriptions)} 个订阅")
                 else:
                     print(f"警告: {SUBSCRIPTIONS_FILE}文件为空")
@@ -2231,14 +2230,16 @@ def init_monitor():
 def save_subscriptions():
     """保存订阅数据到文件"""
     try:
+        # 检查间隔全局强制为5秒，保存时也固定为5秒
+        monitor.check_interval = 5
         subscriptions_data = {
             "subscriptions": monitor.subscriptions,
             "known_servers": list(monitor.known_servers),
-            "check_interval": monitor.check_interval
+            "check_interval": 5  # 全局固定为5秒
         }
         with open(SUBSCRIPTIONS_FILE, 'w', encoding='utf-8') as f:
             json.dump(subscriptions_data, f, ensure_ascii=False, indent=2)
-        add_log("INFO", "订阅数据已保存", "monitor")
+        add_log("INFO", "订阅数据已保存（检查间隔固定为5秒）", "monitor")
     except Exception as e:
         add_log("ERROR", f"保存订阅数据失败: {str(e)}", "monitor")
 
@@ -2629,20 +2630,9 @@ def get_monitor_status():
 
 @app.route('/api/monitor/interval', methods=['PUT'])
 def set_monitor_interval():
-    """设置监控间隔"""
-    data = request.json
-    interval = data.get("interval")
-    
-    if not interval or not isinstance(interval, int):
-        return jsonify({"status": "error", "message": "无效的interval参数"}), 400
-    
-    success = monitor.set_check_interval(interval)
-    
-    if success:
-        save_subscriptions()
-        return jsonify({"status": "success", "message": f"检查间隔已设置为 {interval} 秒"})
-    else:
-        return jsonify({"status": "error", "message": "设置失败，间隔不能小于5秒"}), 400
+    """设置监控间隔（已禁用，全局固定为5秒）"""
+    # 检查间隔全局固定为5秒，不允许修改
+    return jsonify({"status": "info", "message": "检查间隔已全局固定为5秒，无法修改"}), 200
 @app.route('/api/telegram/set-webhook', methods=['POST'])
 def set_telegram_webhook():
     """
@@ -8455,11 +8445,10 @@ if __name__ == '__main__':
     # Load data first (会加载订阅数据)
     load_data()
     
-    # 确保使用新的默认值5秒（如果配置文件中没有保存check_interval）
-    if monitor.check_interval == 300 or monitor.check_interval == 60:
-        print(f"检测到旧的检查间隔{monitor.check_interval}秒，更新为5秒")
-        monitor.check_interval = 5
-        save_subscriptions()
+    # 检查间隔全局强制为5秒（无任何条件判断）
+    monitor.check_interval = 5
+    save_subscriptions()
+    print(f"监控检查间隔已强制设置为: 5秒（全局固定值）")
     
     # 只在主进程启动后台线程（避免Flask reloader重复启动）
     # 使用环境变量判断是否为主进程
@@ -8483,9 +8472,12 @@ if __name__ == '__main__':
         print("跳过后台线程启动（等待主进程）")
     
     # 自动启动服务器监控（如果有订阅）
+    # 检查间隔全局强制为5秒
+    monitor.check_interval = 5
+    
     if len(monitor.subscriptions) > 0:
         monitor.start()
-        add_log("INFO", f"自动启动服务器监控（{len(monitor.subscriptions)} 个订阅）")
+        add_log("INFO", f"自动启动服务器监控（{len(monitor.subscriptions)} 个订阅，检查间隔: 5秒）")
     
     # Add initial log
     add_log("INFO", "Server started")

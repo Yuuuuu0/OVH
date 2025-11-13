@@ -1112,10 +1112,12 @@ class ServerMonitor:
                 self.add_log("ERROR", f"错误详情: {traceback.format_exc()}", "monitor")
             
             # 等待下次检查（使用可中断的sleep）
+            # 注意：每次循环都重新读取 check_interval，确保使用最新值
             if self.running:
-                self.add_log("INFO", f"等待 {self.check_interval} 秒后进行下次检查...", "monitor")
+                current_interval = self.check_interval  # 在循环开始前读取当前值
+                self.add_log("INFO", f"等待 {current_interval} 秒后进行下次检查...", "monitor")
                 # 分段sleep，每秒检查一次running状态，实现快速停止
-                for _ in range(self.check_interval):
+                for _ in range(current_interval):
                     if not self.running:
                         break
                     time.sleep(1)
@@ -1162,11 +1164,8 @@ class ServerMonitor:
         }
     
     def set_check_interval(self, interval):
-        """设置检查间隔（秒）"""
-        if interval < 5:
-            self.add_log("WARNING", "检查间隔不能小于5秒", "monitor")
-            return False
-        
-        self.check_interval = interval
-        self.add_log("INFO", f"检查间隔已设置为 {interval} 秒", "monitor")
+        """设置检查间隔（秒）- 已禁用，全局固定为5秒"""
+        # 检查间隔全局固定为5秒，不允许修改
+        self.check_interval = 5
+        self.add_log("INFO", "检查间隔已全局固定为5秒，无法修改", "monitor")
         return True
