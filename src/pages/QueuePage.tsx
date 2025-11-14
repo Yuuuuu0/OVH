@@ -9,10 +9,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   API_URL, 
   TASK_RETRY_INTERVAL, 
-  MIN_RETRY_INTERVAL, 
-  MAX_RETRY_INTERVAL,
+  MIN_RETRY_INTERVAL,
   QUEUE_POLLING_INTERVAL,
-  validateRetryInterval,
   formatInterval
 } from "@/config/constants";
 import { OVH_DATACENTERS, DatacenterInfo } from "@/config/ovhConstants";
@@ -112,6 +110,11 @@ const QueuePage = () => {
 
     if (quantity < 1 || quantity > 100) {
       toast.error("抢购数量必须在 1-100 之间");
+      return;
+    }
+
+    if (retryInterval <= 0) {
+      toast.error("重试间隔必须大于 0 秒");
       return;
     }
 
@@ -364,7 +367,7 @@ const QueuePage = () => {
                 <label htmlFor="retryInterval" className="block text-sm font-medium text-cyber-secondary mb-1">
                   抢购失败后重试间隔 (秒)
                   <span className="text-xs text-cyber-muted ml-2">
-                    范围: {MIN_RETRY_INTERVAL}-{MAX_RETRY_INTERVAL}秒，推荐: {TASK_RETRY_INTERVAL}秒
+                    推荐: {TASK_RETRY_INTERVAL}秒
                   </span>
                 </label>
                 <input
@@ -373,22 +376,26 @@ const QueuePage = () => {
                   value={retryInterval}
                   onChange={(e) => {
                     const value = Number(e.target.value);
-                    if (value >= MIN_RETRY_INTERVAL && value <= MAX_RETRY_INTERVAL) {
-                      setRetryInterval(value);
-                    } else {
-                      toast.warning(`重试间隔必须在 ${MIN_RETRY_INTERVAL}-${MAX_RETRY_INTERVAL} 秒之间`);
+                    // 允许任何正数输入，包括小数
+                    if (value > 0 || e.target.value === '') {
+                      setRetryInterval(value > 0 ? value : 0);
                     }
                   }}
-                  min={MIN_RETRY_INTERVAL}
-                  max={MAX_RETRY_INTERVAL}
+                  min={0}
+                  step={1}
                   className={`w-full cyber-input bg-cyber-surface text-cyber-text border-cyber-border focus:ring-cyber-primary focus:border-cyber-primary ${
-                    !validateRetryInterval(retryInterval) ? 'border-red-500' : ''
+                    retryInterval > 0 && retryInterval < MIN_RETRY_INTERVAL ? 'border-yellow-500' : ''
                   }`}
                   placeholder={`推荐: ${TASK_RETRY_INTERVAL}秒`}
                 />
-                {!validateRetryInterval(retryInterval) && (
-                  <p className="text-xs text-red-400 mt-1">
+                {retryInterval > 0 && retryInterval < MIN_RETRY_INTERVAL && (
+                  <p className="text-xs text-yellow-400 mt-1">
                     ⚠️ 间隔时间过短可能导致API过载，建议设置为 {TASK_RETRY_INTERVAL} 秒或更长
+                  </p>
+                )}
+                {retryInterval <= 0 && (
+                  <p className="text-xs text-red-400 mt-1">
+                    ⚠️ 重试间隔必须大于 0
                   </p>
                 )}
               </div>
