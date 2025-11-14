@@ -212,7 +212,9 @@ def load_data():
                                 sub.get('notifyUnavailable', False),
                                 sub.get('serverName'),  # 恢复服务器名称
                                 sub.get('lastStatus', {}),  # ✅ 恢复上次状态，避免重复通知
-                                sub.get('history', [])  # ✅ 恢复历史记录
+                                sub.get('history', []),  # ✅ 恢复历史记录
+                                sub.get('autoOrder', False),  # 恢复自动下单标记
+                                sub.get('autoOrderQuantity', 0)  # 恢复自动下单数量
                             )
                     # 恢复已知服务器列表
                     if 'known_servers' in subscriptions_data:

@@ -401,8 +401,10 @@ class ServerMonitor:
                         
                         # 获取自动下单数量（如果设置了数量，则批量下单，不受2分钟限制）
                         auto_order_quantity = subscription.get("autoOrderQuantity", 0)
+                        self.add_log("INFO", f"[monitor->order] 读取自动下单数量: autoOrderQuantity={auto_order_quantity}, subscription keys={list(subscription.keys())}", "monitor")
                         skip_duplicate_check = auto_order_quantity > 0  # 如果设置了数量，跳过2分钟限制
                         order_count = auto_order_quantity if auto_order_quantity > 0 else 1  # 下单数量
+                        self.add_log("INFO", f"[monitor->order] 下单配置: order_count={order_count}, skip_duplicate_check={skip_duplicate_check}", "monitor")
                         
                         # 对所有有货的机房进行并发下单（如果plan_code已标记为有效，都跳过价格核验）
                         def place_order(notif, order_index=0):
