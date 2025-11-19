@@ -1,7 +1,9 @@
 version: "3.8"
 services:
   ovh-app:
-    image: iniwex/ovh:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.hub
     container_name: OVH
     ports:
       - "20000:80"
