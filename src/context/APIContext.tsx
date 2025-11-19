@@ -78,18 +78,28 @@ export const API_Provider = ({ children }: { children: ReactNode }) => {
         const response = await api.get(`/settings`);
         const data = response.data;
         
-        if (data && data.appKey) {
-          setAppKey(data.appKey);
-          setAppSecret(data.appSecret);
-          setConsumerKey(data.consumerKey);
-          setEndpoint(data.endpoint || 'ovh-eu');
+        if (data) {
+          // 加载 OVH API 配置（如果存在）
+          if (data.appKey) {
+            setAppKey(data.appKey);
+            setAppSecret(data.appSecret || '');
+            setConsumerKey(data.consumerKey || '');
+            setEndpoint(data.endpoint || 'ovh-eu');
+            setIsAuthenticated(true);
+            apiEvents.emitAuthChanged(true);
+          }
+          
+          // 加载 Telegram 配置（独立于 OVH API 配置）
           setTgToken(data.tgToken || '');
           setTgChatId(data.tgChatId || '');
-          setIam(data.iam || 'go-ovh-ie');
-          setZone(data.zone || 'IE');
           
-          setIsAuthenticated(true);
-          apiEvents.emitAuthChanged(true);
+          // 加载区域设置（如果存在）
+          if (data.iam) {
+            setIam(data.iam);
+          }
+          if (data.zone) {
+            setZone(data.zone);
+          }
         }
       } catch (error) {
         console.error('Failed to load API keys:', error);
